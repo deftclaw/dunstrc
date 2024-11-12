@@ -1,0 +1,34 @@
+#!/usr/bin/bash
+
+function install-fonts() {
+  font_dir=$HOME/.local/share/fonts
+
+  [[ ! -d "$font_dir" ]] && mkdir "$font_dir"  # Create user-font dir unless it exits
+
+  # Copy in fonts unless they are both already in the user-font directory
+  if [[ ! -r "$font_dir/KisMiklos.otf" ]] && [[ ! -r "$font_dir/OpenMoji-color-colr1_svg.ttf" ]]
+  then
+    tar -xf fonts
+    pushd fonts
+      cp ./* "$font_dir"/
+    popd
+  fi
+
+  fc-cache -r  # Reload the installed fonts
+}
+
+function install-config() {
+  config_dir=$HOME/.local/etc/xdg/dunst
+
+  [[ -d "$config_dir" ]] || mkdir -pv "$config_dir"            # Create user-dunst config-dir
+  [[ -r "$config_dir/dunstrc" ]] || cp dunstrc "$config_dir"/  # Copy in dunstrc
+
+  # Restart dunst, without poluting console, unattached so you can close the window
+  pkill dunst
+  dunst &>/dev/null &
+  disown
+}
+
+# Run the functions
+install-fonts
+install-config
